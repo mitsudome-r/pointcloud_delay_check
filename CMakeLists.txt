@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.0.2)
 project(pointcloud_delay_check)
 
 # Default to C++14
@@ -11,38 +11,49 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 # find dependencies
-find_package(PCL REQUIRED COMPONENTS common)
+find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs pcl_ros pluginlib nodelet)
 
-find_package(ament_cmake_auto REQUIRED)
-ament_auto_find_build_dependencies()
+catkin_package()
 
-include_directories(${PCL_INCLUDE_DIRS})
-link_directories(${PCL_LIBRARY_DIRS})
-add_definitions(${PCL_DEFINITIONS})
+include_directories(include ${catkin_INCLUDE_DIRS})
 
-ament_auto_add_library(pointcloud_publisher SHARED
-  src/pointcloud_publisher.cpp
+add_executable(pointcloud_publisher_node src/pointcloud_publisher.cpp)
+target_link_libraries(pointcloud_publisher_node ${catkin_LIBRARIES})
+
+add_executable(pointcloud_delay_check_node src/pointcloud_delay_checker.cpp)
+target_link_libraries(pointcloud_delay_check_node ${catkin_LIBRARIES})
+
+# nodelets
+add_library(pointcloud_publisher_nodelet
+  src/pointcloud_publisher_nodelet.cpp    # この行を追加
+)
+target_link_libraries(pointcloud_publisher_nodelet
+  ${catkin_LIBRARIES}
+)
+add_library(pointcloud_delay_checker_nodelet
+  src/pointcloud_delay_checker_nodelet.cpp    # この行を追加
+)
+target_link_libraries(pointcloud_delay_checker_nodelet
+  ${catkin_LIBRARIES}
 )
 
-rclcpp_components_register_node(pointcloud_publisher
-  PLUGIN "PointCloudPublisher"
-  EXECUTABLE pointcloud_publisher_node
+install(
+  TARGETS
+    pointcloud_publisher_node
+    pointcloud_delay_check_node
+    pointcloud_publisher_nodelet
+    pointcloud_delay_checker_nodelet
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-ament_auto_add_library(pointcloud_delay_checker SHARED
-  src/pointcloud_delay_checker.cpp
+install(
+  DIRECTORY
+    launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
-rclcpp_components_register_node(pointcloud_delay_checker
-  PLUGIN "PointCloudDelayChecker"
-  EXECUTABLE pointcloud_delay_checker_node
-)
-
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-endif()
-
-ament_auto_package(
-  INSTALL_TO_SHARE
+install(FILES nodelet_description.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )

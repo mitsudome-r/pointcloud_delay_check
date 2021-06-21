@@ -4,11 +4,14 @@
 #include "pcl_conversions/pcl_conversions.h"
 
 #include "ros/ros.h"
+#include <nodelet/nodelet.h>
+#include <pluginlib/class_list_macros.h>
+
 #include "sensor_msgs/PointCloud2.h"
 
-class PointCloudPublisher{
+class PointCloudPublisherNodelet : public nodelet::Nodelet{
 public:
-  PointCloudPublisher();
+  virtual void onInit();
 
 private:
   ros::NodeHandle pnh_;
@@ -21,8 +24,11 @@ private:
   void onTimer(const ros::TimerEvent&);
 };
 
-PointCloudPublisher::PointCloudPublisher() : pnh_("~")
+void PointCloudPublisherNodelet::onInit()
 {
+  nh_ = getNodeHandle();
+  pnh_ = getPrivateNodeHandle();
+
   double rate;
   int width, length;
   pnh_.param<double>("rate", rate, 10.0);
@@ -31,7 +37,6 @@ PointCloudPublisher::PointCloudPublisher() : pnh_("~")
 
   // create pointcloud message
   ROS_INFO_STREAM("creating pointcloud with " << width * length << " points.");
-
   pcl::PointCloud<pcl::PointXYZI> cloud;
   for (int x = 0; x < width; x++)
   {
@@ -50,20 +55,14 @@ PointCloudPublisher::PointCloudPublisher() : pnh_("~")
   msg_.header.frame_id = "map";
 
   // set timer
-  timer_ = nh_.createTimer(ros::Duration(1.0 / rate), &PointCloudPublisher::onTimer, this);
+  timer_ = nh_.createTimer(ros::Duration(1.0 / rate), &PointCloudPublisherNodelet::onTimer, this);
   pub_ = nh_.advertise<sensor_msgs::PointCloud2>("pointcloud", 1);
 }
 
-void PointCloudPublisher::onTimer(const ros::TimerEvent&)
+void PointCloudPublisherNodelet::onTimer(const ros::TimerEvent&)
 {
   msg_.header.stamp = ros::Time::now();
   pub_.publish(msg_);
 }
 
-int main(int argc, char *argv[])
-{
-  ros::init(argc, argv, "pointcloud_publisher");
-  PointCloudPublisher node;
-  ros::spin();
-  return 0;
-}
+PLUGINLIB_EXPORT_CLASS(PointCloudPublisherNodelet, nodelet::Nodelet)

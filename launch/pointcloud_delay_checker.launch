@@ -1,0 +1,18 @@
+<launch>
+    <arg name="manager_name" default="nodelet_manager" />
+    <arg name="manager_threads" default="2" />
+
+    <node pkg="nodelet" type="nodelet" name="$(arg manager_name)" args="manager" output="screen">
+      <param name="num_worker_threads" value="$(arg manager_threads)" />
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="node_loader0"
+          args="load pointcloud_delay_check/pointcloud_publisher_nodelet $(arg manager_name)" >
+          <param name="width" value="1000"/>
+    </node>
+    <node pkg="nodelet" type="nodelet" name="node_loader1"
+          args="load pointcloud_delay_check/pointcloud_delay_checker_nodelet $(arg manager_name)" output="screen">
+          <remap from="input_topic" to="pointcloud"/>
+    </node>
+
+  </launch>

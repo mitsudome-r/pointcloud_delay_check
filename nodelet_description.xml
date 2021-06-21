@@ -1,0 +1,16 @@
+<library path="lib/libpointcloud_publisher_nodelet">
+    <class name="pointcloud_delay_check/pointcloud_publisher_nodelet"
+        type="PointCloudPublisherNodelet"
+        base_class_type="nodelet::Nodelet">
+        <description>
+        </description>
+    </class>
+</library>
+<library path="lib/libpointcloud_delay_checker_nodelet">
+    <class name="pointcloud_delay_check/pointcloud_delay_checker_nodelet"
+        type="PointCloudDelayCheckerNodelet"
+        base_class_type="nodelet::Nodelet">
+        <description>
+        </description>
+    </class>
+</library>

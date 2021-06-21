@@ -1,32 +1,37 @@
 #include <memory>
 
-#include <rclcpp/rclcpp.hpp>
-#include "sensor_msgs/msg/point_cloud2.hpp"
+#include <ros/ros.h>
+#include "sensor_msgs/PointCloud2.h"
 
-using TopicType = sensor_msgs::msg::PointCloud2;
+using TopicType = sensor_msgs::PointCloud2;
 
-class PointCloudDelayChecker : public rclcpp::Node
+class PointCloudDelayChecker
 {
 public:
-  explicit PointCloudDelayChecker(const rclcpp::NodeOptions & node_options);
+  explicit PointCloudDelayChecker();
 
 private:
-  rclcpp::Subscription<TopicType>::SharedPtr sub_;
-  void callback(std::shared_ptr<TopicType> msg);
+  ros::NodeHandle pnh_;
+  ros::NodeHandle nh_;
+  ros::Subscriber sub_;
+  void callback(const TopicType & msg);
 };
 
-PointCloudDelayChecker::PointCloudDelayChecker(const rclcpp::NodeOptions & node_options)
-: rclcpp::Node("delay_checker", node_options)
+PointCloudDelayChecker::PointCloudDelayChecker() : pnh_("~")
 {
-  sub_ = create_subscription<TopicType>("input_topic", rclcpp::SensorDataQoS(),
-    std::bind(&PointCloudDelayChecker::callback, this, std::placeholders::_1));
+  sub_ = nh_.subscribe("input_topic", 1, &PointCloudDelayChecker::callback, this, ros::TransportHints().tcpNoDelay(true));
 }
 
-void PointCloudDelayChecker::callback(std::shared_ptr<TopicType> msg)
+void PointCloudDelayChecker::callback(const TopicType & msg)
 {
-  double delay = (now() - rclcpp::Time(msg->header.stamp)).seconds();
-  RCLCPP_INFO_STREAM(get_logger(), "delay " << delay);
+  double delay = (ros::Time::now() - msg.header.stamp).toSec();
+  ROS_INFO_STREAM("delay " << delay);
 }
 
-#include <rclcpp_components/register_node_macro.hpp>
-RCLCPP_COMPONENTS_REGISTER_NODE(PointCloudDelayChecker)
+int main(int argc, char *argv[])
+{
+  ros::init(argc, argv, "pointcloud_delay_check");
+  PointCloudDelayChecker node;
+  ros::spin();
+  return 0;
+}
