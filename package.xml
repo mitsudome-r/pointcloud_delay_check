@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>pointcloud_publisher</name>
+  <name>pointcloud_delay_check</name>
   <version>0.0.0</version>
   <description>Pointcloud Publisher</description>
   <maintainer email="ryohsuke.mitsudome@tier4.jp">Ryohsuke Mitsudome</maintainer>
@@ -11,6 +11,7 @@
 
   <depend>rclcpp</depend>
   <depend>geometry_msgs</depend>
+  <depend>libpcl-all-dev</depend>
   <depend>pcl_conversions</depend>
   <depend>sensor_msgs</depend>
 
