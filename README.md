@@ -41,7 +41,7 @@ net.core.wmem_default=8388608
 </CycloneDDS>
 ```
 
-4. Add `export CYCLONEDDS_URI=file:///opt/autoware/cyclonedds_config.xml` at the bottom of `~/.bashrc` file
+4. Add `export CYCLONEDDS_URI=file://${HOME}/cyclonedds_config.xml` at the bottom of `~/.bashrc` file
 5. Build the code:
 ```
 mkdir -p ~/delay_check_ws/src
